@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cadastro - SCM Board</title><link rel="stylesheet" href="/static/style.css"></head>
+<body class="auth-body">
+<div class="auth-card">
+  <h1>Criar conta</h1><p>Faça parte do SCM Board</p>
+  <label>Nome completo</label><input id="nome" placeholder="Ex: July Santos">
+  <label>E-mail</label><input id="email" type="email" placeholder="voce@empresa.com">
+  <label>Senha</label><input id="senha" type="password" placeholder="Mínimo 6 caracteres">
+  <p id="erro" class="erro"></p>
+  <button onclick="doRegister()" class="save">Cadastrar</button>
+  <p class="auth-link">Já tem conta? <a href="/login">Entrar</a></p>
+</div>
+<script>
+async function doRegister(){
+  const nome=document.getElementById('nome').value;
+  const email=document.getElementById('email').value;
+  const senha=document.getElementById('senha').value;
+  if(senha.length<6){ document.getElementById('erro').textContent='Senha precisa ter no mínimo 6 caracteres'; return; }
+  const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome,email,senha})});
+  const j=await r.json();
+  if(j.ok) window.location.href='/';
+  else document.getElementById('erro').textContent=j.erro;
+}
+</script></body></html>

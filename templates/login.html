@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Entrar - SCM Board</title><link rel="stylesheet" href="/static/style.css"></head>
+<body class="auth-body">
+<div class="auth-card">
+  <h1>SCM Board</h1><p>Entre para ver o quadro da equipe</p>
+  <label>E-mail</label><input id="email" type="email" placeholder="voce@empresa.com">
+  <label>Senha</label><input id="senha" type="password" placeholder="Sua senha">
+  <p id="erro" class="erro"></p>
+  <button onclick="doLogin()" class="save">Entrar</button>
+  <p class="auth-link">Não tem conta? <a href="/cadastro">Criar conta</a></p>
+</div>
+<script>
+async function doLogin(){
+  const email=document.getElementById('email').value;
+  const senha=document.getElementById('senha').value;
+  const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})});
+  const j=await r.json();
+  if(j.ok) window.location.href='/';
+  else document.getElementById('erro').textContent=j.erro;
+}
+</script></body></html>

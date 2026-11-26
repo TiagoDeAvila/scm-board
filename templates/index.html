@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCM Board</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    // Aplica o modo noturno ANTES da página aparecer - sem piscar branco
+    if (localStorage.getItem('modo') === 'dark') document.documentElement.classList.add('dark-pre');
+  </script>
+  <style>html.dark-pre body{background:#121212}</style>
+</head>
+<body>
+<header>
+  <!-- ESQUERDA: tudo junto, ☰ não fica mais no meio -->
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button onclick="trocarModo()" id="botao-modo">🌙 Modo Noturno</button>
+    <div style="display:flex; gap:5px;">
+      <button class="aba ativa" id="aba-quadro" onclick="mostrarAba('quadro')">Quadro Principal</button>
+      <button class="aba" id="aba-arquivados" onclick="mostrarAba('arquivados')">📁 Arquivados</button>
+    </div>
+    <button id="btn-menu-fundo" onclick="toggleMenuFundo(event)" title="Personalizar fundo">☰</button>
+  </div>
+
+  <h1>SCM Board</h1>
+
+  <div style="display:flex;gap:10px;align-items:center">
+    <span id="nome-usuario">Olá, {{ user_name }}</span>
+    <button onclick="addPerson()">+ Pessoa</button>
+    <button onclick="trocarNome()" style="background:transparent; border:none; cursor:pointer; font-size:13px; color:#5e6c84;">✏️ Trocar nome</button>
+  </div>
+</header>
+
+<!-- MENU PERSONALIZAR FUNDO - fora do header pra não quebrar o layout -->
+<div id="menu-fundo" class="menu-fundo">
+  <b>🎨 Personalizar fundo</b>
+
+  <small>Cor de fundo</small>
+  <div class="cores-fundo">
+    <button style="background-color:#0f1115 !important" onclick="setFundoCor('#0f1115')" title="Preto"></button>
+    <button style="background-color:#1e3a8a !important" onclick="setFundoCor('#1e3a8a')" title="Azul escuro"></button>
+    <button style="background-color:#14532d !important" onclick="setFundoCor('#14532d')" title="Verde escuro"></button>
+    <button style="background-color:#7f1d1d !important" onclick="setFundoCor('#7f1d1d')" title="Vermelho escuro"></button>
+    <button style="background-color:#4c1d95 !important" onclick="setFundoCor('#4c1d95')" title="Roxo"></button>
+    <button style="background-color:#f1f5f9 !important" onclick="setFundoCor('#f1f5f9')" title="Cinza claro"></button>
+  </div>
+  <label class="btn-cor-custom">🎨 Escolher cor...
+    <input type="color" id="input-cor-fundo" value="#0f1115" onchange="setFundoCor(this.value)">
+  </label>
+
+  <small>Gradiente pronto</small>
+  <div class="cores-fundo">
+    <button style="background:linear-gradient(135deg,#1e3a8a,#7c3aed) !important" onclick="setFundoGradiente('linear-gradient(135deg,#1e3a8a,#7c3aed)')" title="Azul + Roxo"></button>
+    <button style="background:linear-gradient(135deg,#0f766e,#14532d) !important" onclick="setFundoGradiente('linear-gradient(135deg,#0f766e,#14532d)')" title="Verde"></button>
+    <button style="background:linear-gradient(135deg,#b45309,#7f1d1d) !important" onclick="setFundoGradiente('linear-gradient(135deg,#b45309,#7f1d1d)')" title="Laranja + Vermelho"></button>
+    <button style="background:linear-gradient(135deg,#0f172a,#334155) !important" onclick="setFundoGradiente('linear-gradient(135deg,#0f172a,#334155)')" title="Cinza escuro"></button>
+  </div>
+
+  <small>Imagem do computador</small>
+  <label class="btn-upload-fundo">🖼️ Escolher imagem...
+    <input type="file" id="input-img-fundo" accept="image/*" onchange="setFundoImagem(this)" hidden>
+  </label>
+  <label style="font-size:12px;display:flex;gap:6px;align-items:center;margin-top:6px;cursor:pointer;">
+    <input type="checkbox" id="check-escurecer" onchange="toggleEscurecer(this.checked)"> Escurecer imagem pra ler os cards
+  </label>
+
+  <button class="btn-limpar-fundo" onclick="limparFundo()">↩ Voltar fundo padrão</button>
+</div>
+
+<!-- FAIXA QUE SÓ APARECE NOS ARQUIVADOS -->
+<div id="banner-arquivados" style="display:none">
+  📦 Você está vendo demandas <b>ARQUIVADAS</b> — elas não estão mais ativas. Clique em 📤 para restaurar.
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <span class="close" onclick="closeModal()">×</span>
+    <h3>Detalhes da demanda</h3>
+    <label>Título</label><input id="fTitle" autocomplete="off">
+    <label>Observação (aparece no quadro)</label><input id="fObs" autocomplete="off">
+    <div class="row"><div><label>Responsável</label><input id="fResp" autocomplete="off"></div><div><label>Prazo</label><input id="fPrazo" type="date"></div></div>
+    <div class="row"><div><label>Situação</label><input id="fSit" autocomplete="off" readonly onclick="toggleEtiquetas()" placeholder="Clique para etiquetas ▾"></div><div><label>Prioridade</label><select id="fPrio"><option>Baixa</option><option>Média</option><option>Alta</option></select></div></div>
+    <div id="aba-etiquetas" style="display:none; border:1px solid #444; border-radius:8px; padding:8px; margin-bottom:10px;">
+      <div id="lista-etiquetas" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <input id="nova-etiqueta" placeholder="Nova etiqueta..." autocomplete="off" style="flex:1">
+        <input type="color" id="cor-etiqueta" value="#ef4444" style="width:40px; padding:2px;">
+        <button type="button" onclick="criarEtiqueta()" style="padding:6px 10px; border-radius:6px; cursor:pointer;">+ Criar</button>
+      </div>
+      <small style="color:#8993a4">Verde = tranquilo, Amarelo = atenção, Vermelho = urgente. Você escolhe a cor.</small>
+    </div>
+    <label>Descrição</label><textarea id="fDesc" rows="2" autocomplete="off"></textarea>
+    <label>Comentários</label><div id="commentList"></div>
+    <div class="row"><div><input id="newComment" placeholder="Escrever comentário..." autocomplete="off"></div><div style="flex:0 0 90px"><button onclick="addComment()">Enviar</button></div></div>
+    <button type="button" onclick="toggleHistorico()" id="btn-historico" style="width:100%; padding:8px; border:1px solid #444; border-radius:8px; background:transparent; color:inherit; cursor:pointer; font-size:13px; text-align:left;">🕒 Ver histórico ▾</button>
+    <div id="history" style="display:none; font-size:12px; margin-top:6px; max-height:150px; overflow-y:auto;"></div>
+    <button onclick="saveDetail()" class="save">Salvar</button>
+    <button onclick="excluirDemanda()" class="btn-excluir">🗑️ Excluir demanda</button>
+  </div>
+</div>
+
+<!-- ABA IDENTIFICAÇÃO -->
+<div class="modal-bg" id="modalIdentificar" style="display:none;">
+  <div class="modal" style="max-width:360px; text-align:center;">
+    <h3>👋 Quem é você?</h3>
+    <p style="color:#8993a4; font-size:13px;">Seu nome vai aparecer quando você modificar uma demanda, comentar ou no histórico.</p>
+    <input id="input-nome" placeholder="Digite seu nome..." autocomplete="off" style="text-align:center; font-size:16px;">
+    <button onclick="confirmarNome()" class="save" style="margin-top:10px;">Entrar no quadro</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+// ============ MODO NOTURNO - aqui no HTML, não depende do app.js ============
+function trocarModo() {
+  const estaNoite = document.body.classList.toggle('dark');
+  document.documentElement.classList.remove('dark-pre');
+  localStorage.setItem('modo', estaNoite ? 'dark' : 'claro');
+  document.getElementById('botao-modo').innerText = estaNoite ? '☀️ Modo Claro' : '🌙 Modo Noturno';
+}
+// Ao abrir, aplica o modo salvo
+(function() {
+  const noite = localStorage.getItem('modo') === 'dark';
+  document.body.classList.toggle('dark', noite);
+  document.documentElement.classList.remove('dark-pre');
+  document.getElementById('botao-modo').innerText = noite ? '☀️ Modo Claro' : '🌙 Modo Noturno';
+})();
+
+// Fechar modal só se APERTAR fora, não se SOLTAR fora
+let apertouFora = false;
+const modalBg = document.getElementById('modalBg');
+modalBg.addEventListener('mousedown', e => { apertouFora = (e.target === modalBg); });
+modalBg.addEventListener('click', e => {
+  if (e.target === modalBg && apertouFora) closeModal();
+  apertouFora = false;
+});
+</script>
+</body>
+</html>
