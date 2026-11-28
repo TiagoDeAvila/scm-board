@@ -68,10 +68,13 @@ function menuPessoaHTML(p){
   <button class="perigo" onclick="fecharMenus();delPerson(${p.id})">🗑️ Remover pessoa</button></div></span>`;
 }
 
-// CORRIGIDO: nunca apaga form/modal aberto, só marca pendente
+// CORRIGIDO: nunca apaga form/modal/menu aberto, só marca pendente
 async function load(forcar=false){
   if(carregando)return;
-  if(document.querySelector('.form-nova-demanda')||$('modalBg')?.classList.contains('open')){
+  if(document.querySelector('.form-nova-demanda')
+    || $('modalBg')?.classList.contains('open')
+    || document.querySelector('.menu-pessoa.aberto')
+    || document.querySelector('.menu-fundo.aberto')){
     if(forcar) recarregarPendente=true;
     return;
   }
@@ -103,7 +106,12 @@ function cardHTML(c,isArq){
 async function addPerson(){const n=prompt('Nome da pessoa:');if(n?.trim()){await post('/api/people',{name:n.trim()});load(true)}}
 async function delPerson(id){if(confirm('Remover essa pessoa e todas as demandas dela?')){await del(`/api/people/${id}`);load(true)}}
 function toggleMenuPessoa(e,id){e.stopPropagation();const m=$('menu-pessoa-'+id),ab=m.classList.contains('aberto');fecharMenus();if(!ab)m.classList.add('aberto')}
-function fecharMenus(){document.querySelectorAll('.menu-pessoa.aberto').forEach(m=>m.classList.remove('aberto'));$('menu-fundo')?.classList.remove('aberto')}
+function fecharMenus(){
+  const tinhaAberto=document.querySelector('.menu-pessoa.aberto')||document.querySelector('.menu-fundo.aberto');
+  document.querySelectorAll('.menu-pessoa.aberto').forEach(m=>m.classList.remove('aberto'));
+  $('menu-fundo')?.classList.remove('aberto');
+  if(tinhaAberto && recarregarPendente) load(true);
+}
 document.addEventListener('click',e=>{if(!e.target.closest('.menu-pessoa-wrap')&&!e.target.closest('#menu-fundo')&&e.target.id!=='btn-menu-fundo')fecharMenus()});
 async function renomearPessoa(id,nomeAtual){const novo=prompt('Novo nome da pessoa:',nomeAtual);if(!novo?.trim()||novo.trim()===nomeAtual)return;await put(`/api/people/${id}`,{name:novo.trim()});load(true)}
 async function alterarCorPessoa(id,cor,el){
@@ -223,4 +231,9 @@ document.addEventListener('DOMContentLoaded',()=>{ligarAbas();verificarIdentific
 canal.onmessage=e=>{if(e.data==='atualizou')load(true)};
 window.addEventListener('focus',()=>load(true));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load(true)});
-setInterval(()=>{ if(!document.querySelector('.form-nova-demanda') && !$('modalBg')?.classList.contains('open')) load(true); },5000);
+setInterval(()=>{
+  if(!document.querySelector('.form-nova-demanda')
+    && !$('modalBg')?.classList.contains('open')
+    && !document.querySelector('.menu-pessoa.aberto')
+    && !document.querySelector('.menu-fundo.aberto')) load(true);
+},5000);
