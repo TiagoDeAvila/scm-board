@@ -1,7 +1,7 @@
 // ============ ESTADO ============
 let abaAtual='quadro',currentId=null;
 let todasEtiquetas=[],etiquetasSelecionadas=new Set();
-let carregando=false,ultimoHash='';
+let carregando=false,ultimoHash='',recarregarPendente=false;
 const canal=new BroadcastChannel('scm-board-sync');
 
 // ============ CORES ============
@@ -68,17 +68,21 @@ function menuPessoaHTML(p){
   <button class="perigo" onclick="fecharMenus();delPerson(${p.id})">🗑️ Remover pessoa</button></div></span>`;
 }
 
+// CORRIGIDO: nunca apaga form/modal aberto, só marca pendente
 async function load(forcar=false){
   if(carregando)return;
-  if(!forcar&&(document.querySelector('.form-nova-demanda')||$('modalBg')?.classList.contains('open')))return;
+  if(document.querySelector('.form-nova-demanda')||$('modalBg')?.classList.contains('open')){
+    if(forcar) recarregarPendente=true;
+    return;
+  }
   carregando=true;
   try{
     const people=await api(`/api/board?arquivados=${abaAtual==='arquivados'}`);
     if(!Array.isArray(people))return;
-    // Não redesenha se nada mudou = muito mais rápido
     const hash=JSON.stringify(people)+abaAtual;
     if(hash===ultimoHash&&!forcar)return;
     ultimoHash=hash;
+    recarregarPendente=false;
     const isArq=abaAtual==='arquivados';
     $('board').innerHTML=people.map(p=>{
       const cor=corEfetiva(p.color||getCor(p.id));
@@ -118,7 +122,7 @@ function mostrarFormNovaDemanda(coluna,personId,btnAdd){
   form.innerHTML=`<input placeholder="Título da demanda..." autofocus><textarea rows="2" placeholder="Observação (opcional)..."></textarea><div style="display:flex;gap:6px"><button class="btn-salvar">Salvar</button><button class="btn-cancelar">Cancelar</button></div>`;
   coluna.appendChild(form);
   const input=form.querySelector('input'),textarea=form.querySelector('textarea');input.focus();
-  const fechar=()=>{form.remove();if(btnAdd)btnAdd.style.display=''};
+  const fechar=()=>{form.remove();if(btnAdd)btnAdd.style.display=''; if(recarregarPendente) load(true);};
   const salvar=async()=>{const titulo=input.value.trim();if(!titulo)return alert('Digite o título da demanda');fechar();const nc=await post('/api/cards',{person_id:personId,title:titulo,obs:textarea.value.trim()});if(nc?.id)load(true)};
   form.querySelector('.btn-salvar').onclick=salvar;
   form.querySelector('.btn-cancelar').onclick=()=>{fechar();load(true)};
@@ -164,7 +168,7 @@ async function openDetail(id){
   $('history').style.display='none';$('btn-historico').textContent=`🕒 Ver histórico (${(c.history||[]).length}) ▾`;
   $('modalBg').classList.add('open');
 }
-function closeModal(){$('modalBg').classList.remove('open')}
+function closeModal(){$('modalBg').classList.remove('open'); if(recarregarPendente) load(true);}
 function toggleHistorico(){const h=$('history'),b=$('btn-historico'),ab=h.style.display!=='none';h.style.display=ab?'none':'block';b.textContent=ab?b.textContent.replace('Ocultar','Ver').replace('▴','▾'):b.textContent.replace('Ver','Ocultar').replace('▾','▴')}
 async function addComment(){
   const inp=$('newComment');if(!inp.value.trim())return;
@@ -219,4 +223,4 @@ document.addEventListener('DOMContentLoaded',()=>{ligarAbas();verificarIdentific
 canal.onmessage=e=>{if(e.data==='atualizou')load(true)};
 window.addEventListener('focus',()=>load(true));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)load(true)});
-setInterval(()=>load(true),3000);
+setInterval(()=>{ if(!document.querySelector('.form-nova-demanda') && !$('modalBg')?.classList.contains('open')) load(true); },5000);
