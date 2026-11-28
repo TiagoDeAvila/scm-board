@@ -394,3 +394,17 @@ function toggleMenuFundo(e) {
 // ============ INICIO ============
 document.addEventListener('DOMContentLoaded', () => { ligarAbas(); verificarIdentificacao(); aplicarFundo(); load(); });
 setInterval(load, 5000);
+
+// ===== SINCRONIZAR ENTRE ABAS =====
+const canal = new BroadcastChannel('scm-board-sync');
+
+// Quando outra aba salvar, recarrega aqui
+canal.onmessage = (e) => {
+  if (e.data === 'atualizou') carregarDados();
+};
+
+// Se fechar e abrir, também recarrega quando voltar pra aba
+window.addEventListener('focus', () => carregarDados());
+
+// Backup: recarrega sozinho a cada 3 segundos
+setInterval(() => carregarDados(), 3000);
