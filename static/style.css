@@ -1,10 +1,11 @@
-/* ============ VARIÁVEIS - MODO CLARO / ESCURO ============ */
+/* ============ VARIÁVEIS ============ */
 :root{
   --bg:#f4f5f7; --texto:#172b4d; --muted:#5e6c84;
   --header:#fff; --borda:#e2e2e2;
   --coluna:#ebecf0; --card:#fff; --card-borda:#ddd;
   --hover:#f1f2f4; --input-bg:#fff; --input-borda:#dfe1e6;
   --menu:#fff; --sombra:0 8px 24px rgba(0,0,0,.22);
+  --azul:#0b6efd; --azul-escuro:#2563eb; --vermelho:#dc2626; --verde:#22c55e;
 }
 body.dark{
   --bg:#121212; --texto:#e0e0e0; --muted:#ccc;
@@ -12,25 +13,26 @@ body.dark{
   --coluna:#1e1e1e; --card:#2a2a2a; --card-borda:#444;
   --hover:#3a3a3a; --input-bg:#2a2a2a; --input-borda:#444;
   --menu:#2a2a2a; --sombra:0 8px 24px rgba(0,0,0,.6);
-  background-color:#121212; /* garante o fundo escuro mesmo com fundo do ☰ limpo */
+  background:#121212;
 }
 
-/* ============ BASE ============ */
+/* ============ BASE - CORRIGIDO BARRA ============ */
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
-body{margin:0;background:var(--bg);color:var(--texto);min-height:100vh}
-header{background:var(--header);padding:16px 20px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;gap:10px;flex-wrap:wrap}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--texto);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{background:var(--header);padding:16px 20px;border-bottom:1px solid var(--borda);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
 header h1{font-size:18px;margin:0}
-button{background:#0b6efd;color:#fff;border:0;padding:8px 14px;border-radius:8px;cursor:pointer}
+button{background:var(--azul);color:#fff;border:0;padding:8px 14px;border-radius:8px;cursor:pointer}
 #botao-modo{padding:8px 12px;border:none;border-radius:8px;cursor:pointer;white-space:nowrap}
 
 /* ============ QUADRO ============ */
-.board{display:flex;gap:16px;padding:20px;overflow-x:auto;align-items:flex-start}
-.person{background:var(--coluna);border-radius:12px;width:300px;flex-shrink:0;padding:12px;position:relative;border:1px solid var(--borda)}
+.board{flex:1;min-height:0;display:flex;gap:16px;padding:20px;overflow-x:auto;overflow-y:hidden;align-items:flex-start}
+.person{background:var(--coluna);border-radius:12px;width:300px;flex-shrink:0;padding:12px;position:relative;border:1px solid var(--borda);max-height:100%;overflow-y:auto}
 .person h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
 .person h2 span{background:var(--card);padding:2px 8px;border-radius:20px;font-size:12px}
 
 /* ============ MENU ⋯ DA COLUNA ============ */
-.menu-pessoa-wrap{position:relative;background:transparent!important;padding:0!important;border-radius:0!important}
+.menu-pessoa-wrap{position:relative;background:transparent!important;padding:0!important}
 .btn-menu-pessoa{background:transparent!important;color:var(--texto)!important;font-size:20px!important;font-weight:bold;line-height:1;padding:0 6px!important;border-radius:6px}
 .btn-menu-pessoa:hover{background:rgba(0,0,0,.1)!important}
 .menu-pessoa{display:none;position:absolute;right:0;top:26px;z-index:50;min-width:215px;background:var(--menu);border-radius:10px;box-shadow:var(--sombra);padding:6px;flex-direction:column}
@@ -41,13 +43,13 @@ button{background:#0b6efd;color:#fff;border:0;padding:8px 14px;border-radius:8px
 .menu-pessoa button.perigo:hover{background:#fee2e2!important}
 body.dark .menu-pessoa button.perigo:hover{background:#4a1a1a!important}
 
-/* ============ CORES DA COLUNA - 1 definição só ============ */
+/* ============ CORES DA COLUNA ============ */
 .menu-cores{padding:8px 10px;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);margin:4px 0}
 .menu-cores small{color:var(--muted);font-size:12px;font-weight:600}
 .cores-lista{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;padding:6px 0}
-.bolinha-cor{width:30px!important;height:30px!important;padding:0!important;border:2px solid rgba(0,0,0,.25)!important;border-radius:50%!important;cursor:pointer;min-width:0!important;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.3);font-size:14px;line-height:1;color:#111;opacity:1!important;filter:none!important;background-image:none!important}
+.bolinha-cor{width:30px!important;height:30px!important;padding:0!important;border:2px solid rgba(0,0,0,.25)!important;border-radius:50%!important;cursor:pointer;min-width:0!important;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.3);font-size:14px;line-height:1;color:#111}
 .bolinha-cor:hover{transform:scale(1.15)}
-.bolinha-cor.selecionada{border-color:#2563eb!important;outline:2px solid #2563eb;outline-offset:2px}
+.bolinha-cor.selecionada{border-color:var(--azul-escuro)!important;outline:2px solid var(--azul-escuro);outline-offset:2px}
 body.dark .bolinha-cor{border-color:rgba(255,255,255,.6)!important}
 .bolinha-cor-custom{display:flex!important;align-items:center;justify-content:center;font-size:13px;background:#f1f2f4!important;position:relative;overflow:hidden}
 .bolinha-cor-custom input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -60,20 +62,14 @@ body.dark .bolinha-cor{border-color:rgba(255,255,255,.6)!important}
 .comments{font-size:12px;color:var(--muted);margin-top:8px}
 .add{width:100%;padding:10px;border:1px dashed #c1c7d0;background:transparent;border-radius:10px;cursor:pointer;color:var(--muted)}
 body.dark .add{border-color:#444;color:#ccc}
-
-/* Botões do card - aparecem no hover */
 .card-acoes{display:none;position:absolute;top:8px;right:8px;gap:4px;z-index:5}
 .card:hover .card-acoes{display:flex}
 .botao-card{background:var(--card)!important;color:var(--texto)!important;border:1px solid var(--card-borda)!important;border-radius:6px!important;padding:3px 7px!important;font-size:12px!important;cursor:pointer}
 .botao-perigo:hover{background:#fee2e2!important;border-color:#fca5a5!important}
-
-/* Bolinha concluir */
 .bolinha-concluir{position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;border:2px solid #8993a4;background:#1e1e1e;color:#fff;font-size:13px;font-weight:bold;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.4)}
 .bolinha-concluir:hover{border-color:#fff;transform:scale(1.1)}
-.bolinha-concluir.concluido{background:#22c55e;border-color:#22c55e}
-
-/* Card concluído / arquivado */
-.card-concluido{border-left:3px solid #22c55e}
+.bolinha-concluir.concluido{background:var(--verde);border-color:var(--verde)}
+.card-concluido{border-left:3px solid var(--verde)}
 .card-concluido b{text-decoration:line-through;color:#6b7280;opacity:.75}
 .card-arquivado{background:#f1f1f1!important;opacity:.75;border:1px dashed #b0b0b0!important}
 body.dark .card-arquivado{background:#333!important}
@@ -82,10 +78,10 @@ body.dark .card-arquivado{background:#333!important}
 
 /* ============ ABAS / BANNER ============ */
 .aba{background:#e5e7eb!important;color:#333!important;border:1px solid #d1d5db!important;padding:8px 14px!important;border-radius:8px!important;cursor:pointer;font-weight:bold}
-.aba.ativa{background:#2563eb!important;color:#fff!important;border-color:#2563eb!important}
+.aba.ativa{background:var(--azul-escuro)!important;color:#fff!important;border-color:var(--azul-escuro)!important}
 body.dark .aba{background:#2a2a2a!important;color:#ccc!important;border-color:#444!important}
-body.dark .aba.ativa{background:#2563eb!important;color:#fff!important}
-#banner-arquivados{background:#fef3c7;color:#92400e;text-align:center;padding:10px 16px;font-size:14px;border-bottom:1px solid #fcd34d}
+body.dark .aba.ativa{background:var(--azul-escuro)!important;color:#fff!important}
+#banner-arquivados{background:#fef3c7;color:#92400e;text-align:center;padding:10px 16px;font-size:14px;border-bottom:1px solid #fcd34d;flex-shrink:0}
 body.dark #banner-arquivados{background:#3a2e00;color:#fde68a}
 
 /* ============ MODAL ============ */
@@ -101,15 +97,15 @@ body.dark #banner-arquivados{background:#3a2e00;color:#fde68a}
 .close{float:right;cursor:pointer;font-size:20px;color:var(--texto)!important}
 .save{margin-top:16px;width:100%;padding:12px;background:#172b4d;color:#fff;border:0;border-radius:10px}
 
-/* ============ FORM NOVA DEMANDA / BOTÕES ============ */
+/* ============ FORM NOVA DEMANDA ============ */
 .form-nova-demanda{background:var(--card);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}
 .form-nova-demanda input,.form-nova-demanda textarea{width:100%;padding:9px;border:1px solid var(--input-borda);border-radius:8px;font-family:inherit;background:var(--input-bg);color:var(--texto)}
-.btn-salvar{background:#0b6efd!important;flex:1}
+.btn-salvar{background:var(--azul)!important;flex:1}
 .btn-cancelar{background:#e5e7eb!important;color:#333!important;flex:1}
-.btn-excluir{margin-top:10px;width:100%;padding:12px;background:var(--card)!important;color:#dc2626!important;border:1px solid #fca5a5!important;border-radius:10px;cursor:pointer;font-weight:600}
+.btn-excluir{margin-top:10px;width:100%;padding:12px;background:var(--card)!important;color:var(--vermelho)!important;border:1px solid #fca5a5!important;border-radius:10px;cursor:pointer;font-weight:600}
 .btn-excluir:hover{background:#fee2e2!important}
 .btn-concluir{font-size:18px!important;line-height:1;color:#8993a4!important;background:transparent!important}
-.btn-concluir.concluido{color:#22c55e!important;background:#dcfce7!important;border-radius:50%!important}
+.btn-concluir.concluido{color:var(--verde)!important;background:#dcfce7!important;border-radius:50%!important}
 body.dark .btn-concluir.concluido{background:#14532d!important}
 
 /* ============ LOGIN ============ */
@@ -122,7 +118,7 @@ body.dark .btn-concluir.concluido{background:#14532d!important}
 .erro{color:#de350b!important;font-size:13px!important;min-height:18px}
 .auth-link{text-align:center;margin-top:16px}
 
-/* ============ BOTÃO ☰ + MENU PERSONALIZAR FUNDO ============ */
+/* ============ MENU ☰ FUNDO ============ */
 #btn-menu-fundo{background:#1e1e1e;color:#fff;border:1px solid #333;border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;padding:0}
 #btn-menu-fundo:hover{background:#2a2a2a}
 .menu-fundo{display:none;position:fixed;top:58px;left:10px;z-index:999;width:240px;background:#1e1e1e;color:#fff;border:1px solid #333;border-radius:12px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);flex-direction:column;gap:8px}
@@ -133,9 +129,5 @@ body.dark .btn-concluir.concluido{background:#14532d!important}
 .btn-cor-custom,.btn-upload-fundo{background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer;text-align:center;position:relative;overflow:hidden;color:#fff}
 .btn-cor-custom input{position:absolute;opacity:0;inset:0;cursor:pointer}
 .btn-limpar-fundo{background:transparent;color:#ff8080;border:1px solid #444;border-radius:8px;padding:7px;cursor:pointer;margin-top:6px}
-
-/* Fundo personalizado - imagem / cor / gradiente */
-/* O fundo do ☰ é style inline no body, então ele ganha do modo noturno de propósito.
-   Pra voltar ao fundo normal do modo, clica em "↩ Voltar fundo padrão" no menu ☰ */
 body.fundo-imagem{background-size:cover!important;background-position:center;background-attachment:fixed}
 body.fundo-escurecido::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:-1;pointer-events:none}
